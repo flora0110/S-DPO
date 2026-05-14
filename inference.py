@@ -66,7 +66,7 @@ def inference( dataset="",
 
     prompt_path = "prompt.txt" if external_prompt_path=="" else external_prompt_path
     data_files = {
-        "test": "test.json",
+        "test": "./sample_data/lastfm-sft-cans20/lastfm-test.json",
     }
 
 

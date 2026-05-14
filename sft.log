@@ -1,0 +1,4 @@
+Dataset({
+    features: ['prompt', 'completion'],
+    num_rows: 47872
+})

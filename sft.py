@@ -61,8 +61,10 @@ def train(
 
     
     data_files = {
-        "train": "../data/lastfm-sft-cans20/lastfm-train.json",
-        "validation": "../data/lastfm-sft-cans20/lastfm-val.json",
+        # "train": "../data/lastfm-sft-cans20/lastfm-train.json",
+        # "validation": "../data/lastfm-sft-cans20/lastfm-val.json",
+        "train": "./sample_data/lastfm-sft-cans20/lastfm-train.json",
+        "validation": "./sample_data/lastfm-sft-cans20/lastfm-val.json",
     }
     
     data = load_dataset("json", data_files=data_files)
@@ -145,8 +147,8 @@ def train(
         optim="paged_adamw_32bit",
         lr_scheduler_type="cosine",
         warmup_ratio=0.05,
-        report_to="wandb",
-        run_name=wandb_name,
+        report_to=[], #report_to="wandb",
+        # run_name=wandb_name,
         logging_dir=logging_dir,
         gradient_checkpointing_kwargs={'use_reentrant': True}, 
         save_only_model=True,

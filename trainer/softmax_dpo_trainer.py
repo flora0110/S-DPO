@@ -32,7 +32,8 @@ def is_peft_available():
     return importlib.util.find_spec("peft") is not None
 
 if is_peft_available():
-    from peft import get_peft_model, prepare_model_for_int8_training
+    # from peft import get_peft_model, prepare_model_for_int8_training
+    from peft import get_peft_model, prepare_model_for_kbit_training
 
 
 class DPOTrainer(Trainer):
@@ -109,7 +110,7 @@ class DPOTrainer(Trainer):
             )
         elif is_peft_available() and peft_config is not None:
             if getattr(model, "is_loaded_in_8bit", False) or getattr(model, "is_loaded_in_4bit", False):
-                model = prepare_model_for_int8_training(model)
+                model = prepare_model_for_kbit_training(model)
             model = get_peft_model(model, peft_config)
 
         if data_collator is None:

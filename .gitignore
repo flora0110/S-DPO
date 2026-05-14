@@ -1,0 +1,13 @@
+checkpoint-*/
+**/checkpoint-*/
+__pycache__/
+**/__pycache__/
+*.safetensors
+*.pt
+*.pth
+training_args.bin
+experiments/models/*
+**/models/*
+data_sprec/*
+**/*_old/*
+*_old/*

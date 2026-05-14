@@ -1,15 +1,13 @@
 # Position the number of processes specified after the --nproc_per_node flag
-torchrun --nproc_per_node 4 --master_port=25642 sft.py \
-        --model_name base_model_path  \
+export PYTHONNOUSERSITE=1
+CUDA_VISIBLE_DEVICES=1 python sft2.py \
+        --model_name meta-llama/Llama-3.2-1B-Instruct  \
         --batch_size 4 \
-        --gradient_accumulation_steps 8 \
+        --gradient_accumulation_steps 32 \
         --dataset lastfm \
-        --prompt_path prompt_path \
-        --logging_dir log_dir \
-        --output_dir save_path \
-        --wandb_project dpo-rec-nf4 \
+        --prompt_path "./prompt/music.txt" \
+        --logging_dir "./logs/lastfm_sft_321B_200seq/" \
+        --output_dir "./output/lastfm_sft_321B_200seq/" \
         --learning_rate 1e-5 \
-        --num_train_epochs 5 \
-        --eval_step 0.2 \
-        --wandb_project wandb_proj_name \
-        --wandb_name wandb_run_name > sft.log
+        --num_train_epochs 3 \
+        --eval_step 0.2
