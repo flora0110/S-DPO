@@ -10,4 +10,4 @@ experiments/models/*
 **/models/*
 data_sprec/*
 **/*_old/*
-*_old/*
+*_old/*toy_200seq/train_candidate_scores.jsonl
