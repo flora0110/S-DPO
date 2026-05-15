@@ -12,5 +12,5 @@ CUDA_VISIBLE_DEVICES=0 python softmax_dpo2.py \
             --beta 1 \
             --neg_num 3 \
             --num_train_epochs 3 \
-            --logging_dir ./logs/lastfm_sdpo_321B/ \
-            --output_dir ./output/lastfm_sdpo_321B/
+            --logging_dir ./logs/lastfm_sdpo_321B_200seq_1epoch/ \
+            --output_dir ./output/lastfm_sdpo_321B_200seq_1epoch/

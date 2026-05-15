@@ -13,7 +13,7 @@ p_list = [0, 25, 50, 75, 100]
 base = "output"
 
 # metric 設定
-metric_ = "accuracies"   # chosen / rejected / margins
+metric_ = "chosen"   # chosen / rejected / margins
 # metric = metric_
 metric = f"rewards/{metric_}"   # e.g. logps/chosen
 
@@ -26,7 +26,7 @@ for p in p_list:
     elif p == 100:
         p_str = "highest"
     else:
-        p_str = f"p{p}"
+        p_str = f"q{p}"
     checkpoint_dir = f"./{base}/{p_str}_{method}_{category}_dpo_321B_200seq_1epoch/checkpoint-68"
     filename = f"{checkpoint_dir}/trainer_state.json"
 

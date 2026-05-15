@@ -39,9 +39,26 @@ def evaluate(
             max_new_tokens = 20
         )
         s = generation_output.sequences
-        output = tokenizer.batch_decode(s,skip_special_tokens=True)
-        output = [_.strip() for _ in output]
-        return output
+        # output = tokenizer.batch_decode(s,skip_special_tokens=True)
+        # output = [_.strip() for _ in output]
+        # return output
+        # input_lengths = inputs["attention_mask"].sum(dim=1)
+
+        # generated_tokens = [
+        #     seq[input_len:]
+        #     for seq, input_len in zip(s, input_lengths)
+        # ]
+
+        input_token_len = inputs["input_ids"].shape[1]
+        generated_tokens = s[:, input_token_len:]
+
+        outputs = tokenizer.batch_decode(
+            generated_tokens,
+            skip_special_tokens=True
+        )
+
+        outputs = [o.strip() for o in outputs]
+        return outputs
     
     targets = []
     inputs = []
@@ -64,7 +81,8 @@ def evaluate(
         batch_targets = targets[start:end]
         batch_cans = cans[start:end]
         for input_text, output, target, candidates in zip(batch_inputs, outputs, batch_targets, batch_cans):
-            selection = output[len(input_text):]
+            # selection = output[len(input_text):]
+            selection = output
             num_cans = sum([1 for can in candidates if can in selection])  
             print(input_text)
             print(candidates)

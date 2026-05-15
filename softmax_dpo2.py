@@ -43,10 +43,10 @@ def train(
 ):
     
     data_files = {
-        # "train": "./toy_200seq/lastfm-train.json",
-        # "validation": "./toy_200seq/lastfm-val.json",
-        "train": "./sample_data/lastfm-sft-cans20/lastfm-train.json",
-        "validation": "./sample_data/lastfm-sft-cans20/lastfm-val.json",
+        "train": "./toy_200seq/lastfm-train.json",
+        "validation": "./toy_200seq/lastfm-val.json",
+        # "train": "./sample_data/lastfm-sft-cans20/lastfm-train.json",
+        # "validation": "./sample_data/lastfm-sft-cans20/lastfm-val.json",
     }
 
 

@@ -13,14 +13,14 @@ CUDA_VISIBLE_DEVICES=$gpu1 python softmax_dpo_200seq_sort.py \
             --beta 1 \
             --neg_num 1 \
             --num_train_epochs 1 \
-            --logging_dir ./logs/q25_sequence_logprob_margin_lastfm_dpo_321B_200seq_1epoch/ \
-            --output_dir ./output/q25_sequence_logprob_margin_lastfm_dpo_321B_200seq_1epoch/ \
+            --logging_dir ./logs/q75_avg_token_logprob_margin_lastfm_dpo_321B_200seq_1epoch/ \
+            --output_dir ./output/q75_avg_token_logprob_margin_lastfm_dpo_321B_200seq_1epoch/ \
             --train_data_path ./toy_200seq/lastfm-train.json \
             --val_data_path ./toy_200seq/lastfm-val.json \
             --train_candidate_score_path ./toy_200seq/train_candidate_scores.jsonl \
             --val_candidate_score_path ./toy_200seq/val_candidate_scores.jsonl \
-            --reject_sort_metric sequence_logprob_margin \
-            --reject_select_mode q25 \
+            --reject_sort_metric avg_token_logprob_margin \
+            --reject_select_mode q75 \
             --strict_check True \
             # --wandb_project wandb_proj_name \
             # --wandb_name wandb_run_name > dpo.log

@@ -301,6 +301,28 @@ def select_rejected_items_from_scores(
     elif select_mode == "highest":
         selected_rows = descending_rows[:neg_num]
 
+    elif select_mode == "random":
+        selected_rows = random.sample(valid_rows, neg_num)
+
+    elif select_mode == "random_except_lowest":
+
+        lowest_row = ascending_rows[0]
+        lowest_candidate = lowest_row.get("candidate_item", lowest_row.get("rejected"))
+
+        remaining_rows = [
+            row for row in ascending_rows
+            if row.get("candidate_item", row.get("rejected")) != lowest_candidate
+        ]
+
+        if len(remaining_rows) < neg_num:
+            raise ValueError(
+                f"example_id={example_id}: after excluding lowest `{sort_metric}` "
+                f"candidate `{lowest_candidate}`, only {len(remaining_rows)} candidates left, "
+                f"but neg_num={neg_num}."
+            )
+
+        selected_rows = random.sample(remaining_rows, neg_num)
+
     elif select_mode == "both":
         # Example:
         # neg_num=2 -> 1 lowest + 1 highest
