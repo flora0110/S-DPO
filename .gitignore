@@ -11,3 +11,13 @@ experiments/models/*
 data_sprec/*
 **/*_old/*
 *_old/*toy_200seq/train_candidate_scores.jsonl
+sample_data/
+**/sampled_data/
+toy_100seq/
+**/toy_100seq/
+toy_200seq/
+**/toy_200seq/
+**/tokenizer.json
+**/dog.log
+logs/*
+**/tokenizer_config.json

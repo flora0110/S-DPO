@@ -174,6 +174,49 @@ def select_around_quantile(sorted_rows, neg_num, q):
 
     return sorted_rows[start:end]
 
+def select_bell_random(sorted_rows, neg_num, center_q=0.5, sigma_ratio=0.25):
+    n = len(sorted_rows)
+
+    if n < neg_num:
+        raise ValueError(
+            f"Not enough rows for bell_random selection. "
+            f"num_rows={n}, neg_num={neg_num}"
+        )
+
+    center = center_q * (n - 1)
+    sigma = max(1e-8, sigma_ratio * n)
+
+    weights = []
+    for i in range(n):
+        distance = i - center
+        weight = pow(2.718281828459045, -0.5 * (distance / sigma) ** 2)
+        weights.append(weight)
+
+    selected_rows = []
+    available_rows = list(sorted_rows)
+    available_weights = list(weights)
+
+    for _ in range(neg_num):
+        total_weight = sum(available_weights)
+
+        if total_weight <= 0:
+            chosen_idx = random.randrange(len(available_rows))
+        else:
+            r = random.random() * total_weight
+            cumulative = 0.0
+            chosen_idx = 0
+
+            for idx, w in enumerate(available_weights):
+                cumulative += w
+                if cumulative >= r:
+                    chosen_idx = idx
+                    break
+
+        selected_rows.append(available_rows.pop(chosen_idx))
+        available_weights.pop(chosen_idx)
+
+    return selected_rows
+
 def select_rejected_items_from_scores(
     score_by_example,
     example_id,
@@ -184,6 +227,7 @@ def select_rejected_items_from_scores(
     sort_metric="avg_token_logprob_margin",
     select_mode="lowest",
     strict_check=True,
+    sigma_ratio=0.25,
 ):
     """
     Select rejected items from precomputed candidate scores.
@@ -303,7 +347,28 @@ def select_rejected_items_from_scores(
 
     elif select_mode == "random":
         selected_rows = random.sample(valid_rows, neg_num)
+    
+    elif select_mode == "bell_random":
+        selected_rows = select_bell_random(
+            sorted_rows=ascending_rows,
+            neg_num=neg_num,
+            sigma_ratio=sigma_ratio,
+        )
+    elif select_mode == "bell_q25_random":
+        selected_rows = select_bell_random(
+            sorted_rows=ascending_rows,
+            neg_num=neg_num,
+            center_q=0.25,
+            sigma_ratio=sigma_ratio,
+        )
 
+    elif select_mode == "bell_q75_random":
+        selected_rows = select_bell_random(
+            sorted_rows=ascending_rows,
+            neg_num=neg_num,
+            center_q=0.75,
+            sigma_ratio=sigma_ratio,
+        )
     elif select_mode == "random_except_lowest":
 
         lowest_row = ascending_rows[0]
@@ -413,6 +478,7 @@ def train(
     reject_sort_metric: str = "avg_token_logprob_margin",
     reject_select_mode: str = "lowest",  # lowest / highest / both
     strict_check: bool = True,
+    sigma_ratio: float = 0.25,  # only for bell_random select_mode
 ):
     
     data_files = {
@@ -466,6 +532,7 @@ def train(
                     sort_metric=reject_sort_metric,
                     select_mode=reject_select_mode,
                     strict_check=strict_check,
+                    sigma_ratio=sigma_ratio,
                 )
 
                 # negative_items = [item for item in data_point["itemList"] if item != data_point["trueSelection"]]

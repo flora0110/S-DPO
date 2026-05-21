@@ -3,7 +3,7 @@ export PYTHONNOUSERSITE=1
 gpu1=$1;
 CUDA_VISIBLE_DEVICES=$gpu1 python softmax_dpo_200seq.py \
             --model_name meta-llama/Llama-3.2-1B-Instruct  \
-            --resume_from_checkpoint ./output/lastfm_sft_321B_200seq \
+            --resume_from_checkpoint ./output/lastfm_sft_321B \
             --batch_size 4 \
             --gradient_accumulation_steps 32 \
             --dataset lastfm \
@@ -13,8 +13,8 @@ CUDA_VISIBLE_DEVICES=$gpu1 python softmax_dpo_200seq.py \
             --beta 1 \
             --neg_num 1 \
             --num_train_epochs 1 \
-            --logging_dir ./logs/lastfm_dpo_321B_200seq_1epoch/ \
-            --output_dir ./output/lastfm_dpo_321B_200seq_1epoch/ \
+            --logging_dir ./logs/lastfm_dpo_321B_200seq_1epoch_on_full_sft/ \
+            --output_dir ./output/lastfm_dpo_321B_200seq_1epoch_on_full_sft/ \
             --train_data_path ./toy_200seq/lastfm-train.json \
             --val_data_path ./toy_200seq/lastfm-val.json
             # --wandb_project wandb_proj_name \

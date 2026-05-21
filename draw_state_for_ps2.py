@@ -10,17 +10,17 @@ category = "lastfm"
 # 要畫的 p
 p_list = ["lowest", "highest"]
 
-base = "output"
+base = "output/sdpo_neg3"
 
 # metric 設定
-metric_ = "accuracies"   # chosen / rejected / margins
+metric_ = "chosen"   # chosen / rejected / margins
 # metric = metric_
 metric = f"rewards/{metric_}"   # e.g. logps/chosen
 
 plt.figure(figsize=(10, 6))
 
 # ===== loop 每個 p =====
-checkpoint_dir = f"./{base}/{category}_dpo_321B_200seq_1epoch/checkpoint-68"
+checkpoint_dir = f"./{base}/{category}_dpo_321B/checkpoint-1122"
 filename = f"{checkpoint_dir}/trainer_state.json"
 if not os.path.exists(filename):
     print(f"❌ Missing: p{p}")
@@ -61,7 +61,7 @@ except Exception as e:
 for p in p_list:
     
     for method in ["sequence_logprob_margin", "avg_token_logprob_margin"]:
-        checkpoint_dir = f"./{base}/{p}_{method}_{category}_dpo_321B_200seq_1epoch/checkpoint-68"
+        checkpoint_dir = f"./{base}/{p}_{method}_{category}_dpo_321B/checkpoint-68"
         filename = f"{checkpoint_dir}/trainer_state.json"
 
         if not os.path.exists(filename):
