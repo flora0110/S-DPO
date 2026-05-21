@@ -93,9 +93,9 @@
 ### setup
 選擇在 p25 的周圍用bell distribution random pick3個candidates
 ### neg sampling 分佈
-![bell_q25_sigma005_neg3](./sample_data/lastfm-sft-cans20/bell_q25_sigma005_neg3.png)
-![bell_q25_sigma015_neg3](./sample_data/lastfm-sft-cans20/bell_q25_sigma015_neg3.png)
-![bell_q25_sigma025_neg3](./sample_data/lastfm-sft-cans20/bell_q25_sigma025_neg3.png)
+![bell_q25_sigma025_neg3](./toy_200seq/bell_q25_sigma025_neg3.png)
+![bell_q25_sigma015_neg3](./toy_200seq/bell_q25_sigma015_neg3.png)
+
 
 
 ### Experiments Results
