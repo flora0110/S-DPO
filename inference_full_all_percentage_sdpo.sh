@@ -4,7 +4,7 @@ reject_sort_metric=$2
 epoch=$3
 export PYTHONNOUSERSITE=1
 base_model=meta-llama/Llama-3.2-1B-Instruct
-sigma=0.15
+sigma=0.05
 q_center=0.25
 for reject_select_mode in "bell_random"
 do      

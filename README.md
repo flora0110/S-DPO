@@ -1,6 +1,163 @@
+# Negative sampling base on Sequence logprob margin with Positive sample
+
+## experiment setup
+- sdpo with 3 neg sample
+- epoch 1
+- training: 8792 (200 sequence)
+- test: 1000
+- test: 2495
+### candidates分佈
+![distribution](./toy_200seq/train_sequence_logprob_margin_distribution.png)
+
+## Sampling Center Experiments（負樣本難度）
+### setup
+選擇在p0(min), p25, p50, p75, p100(max)的3個candidates
+### neg sampling 分佈
+- sequenc_logprob_margin
+    - min:   -30.807267
+    - q25:   -2.397336
+    - q50:   0.729880
+    - q75:   3.885110
+    - max:   35.118398
+- SFT finetuing (before dpo)
+    - 0.23246492985971945 0.9879759519038076
+
+### Experiments Results
+#### chosen reward
+![chosen_p](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/chosen_p.png)
+#### rejected reward
+![reward_rejected2_p](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/reward_rejected2_p.png)
+#### margin reward 
+![reward_margins](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/reward_margins-rejected2_p.png)
+
+#### training state
+- 正樣本上升程度
+    - q0>q25>q50>q75>q100
+- 負樣本下降程度
+    - rejected1: p100 >>  p75>p0   >> p25>p50
+    - rejected2: p100 >> p75 >> p0 >> p25>p50
+    - rejected3: p100 >> p75 >> p0 >> p25>p50
+    - logps/rejected-rejected1: p0 > p25 > p50 > p75 > p100
+    - logps/rejected-rejected2: p0 > p25 > p50 > p75 > p100
+    - logps/rejected-rejected3: p0 > p25 > p50 > p75 > p100
+
+#### accuracy / valid ratio
+- sequence_logprob_margin
+    - p100
+        - 0.2681362725450902 0.9807615230460922
+    - q75
+        - 0.27975951903807617 0.9791583166332666
+    - p50
+        - 0.2881763527054108 0.972745490981964
+    - q25
+        - 0.2905811623246493 0.9691382765531062
+    - p0
+        - 0.2380761523046092 0.8416833667334669
+
+### Analysis
+#### accuracy 分析
+- acc
+    - p25 > p50 > p75 > p100 >> p0
+- 結論
+    - p25(微難負樣本)最好，p0(極難負樣本)最差
+    
+#### training state 分析
+- 結論：負樣本難度影響
+    1. fine tuning 更傾向提升正樣本 or 更傾向降低負樣本
+    2. 最終正負樣本reward/margin
+
+- 極端值 (p0/p100)
+    - reward/margin大
+    - p0 極難(-30.807267)
+        - 更傾向提升正樣本
+    - p100 極易(35.118398)
+        - 更傾向降低負樣本
+- 中間 (p25/p75)
+    - reward/margin中
+    - p25 微難(-2.397336)
+        - 更傾向提升正樣本
+    - p75 微易(3.885110)
+        - 更傾向降低負樣本
+- 中間 (p50)
+    - p50 (0.729880)
+        - 正負樣本變動小
+        - reward/margin小
+
+#### 綜合分析
+- p25 vs p50 vs p75
+    - 在margina around 2.0 ~ 1.0時，可能越提升正樣本的策略會比較對acc有幫助
+- p0 vs p100
+    - 為什麼p0 acc << p100 acc ?
+
+## Sampling range Experiments（負樣本集中程度）
+### setup
+選擇在 p25 的周圍用bell distribution random pick3個candidates
+### neg sampling 分佈
+![bell_q25_sigma005_neg3](./sample_data/lastfm-sft-cans20/bell_q25_sigma005_neg3.png)
+![bell_q25_sigma015_neg3](./sample_data/lastfm-sft-cans20/bell_q25_sigma015_neg3.png)
+![bell_q25_sigma025_neg3](./sample_data/lastfm-sft-cans20/bell_q25_sigma025_neg3.png)
+
+
+### Experiments Results
+#### chosen reward
+![chosen](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/reward_chosen_q25.png)
+#### rejected reward
+![rejected1](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/reward_rejected1_q25.png)
+#### margin reward
+![margins-rejected1](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/reward_margins-rejected1_q25.png)
+#### loss reward
+![loss](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/loss_q25.png)
+
+#### training state
+- 正樣本上升程度
+    - q25~bell_q25_random_sigma_0.05~bell_q25_random_sigma_0.15>bell_q25_random_sigma_0.25>>random
+- 負樣本下降程度
+    - q25>>random > qbell_q25_random_sigma_0.25~bell_q25_random_sigma_0.15~bell_q25_random_sigma_0.05
+- margins
+    - q25  > bell_q25_random_sigma_0.05> bell_q25_random_sigma_0.15>bell_q25_random_sigma_0.25>random
+
+#### accuracy / valid ratio
+- sequence_logprob_margin
+    - q25(非random，直接選在q25的candidates)(最集中)
+        - 0.2905811623246493 0.9691382765531062
+    - bell_q25_random_sigma_0.05
+        - 0.28937875751503006 0.9735470941883767
+    - bell_q25_random_sigma_0.15
+        - 0.29298597194388776 0.9595190380761524
+    - bell_q25_random_sigma_0.25
+        - 0.29378757515030063 0.9615230460921844
+- random
+    - 0.29178356713426856 0.9743486973947896
+
+### Analysis
+#### accuracies 分析
+- acc
+    - bell_q25_random_sigma_0.25 > bell_q25_random_sigma_0.15 > random > q25 > bell_q25_random_sigma_0.05
+- 結論
+    - 在q25附近用廣一點的分佈acc最好
+
+#### training state 分析
+- 負樣本集中程度影響
+    1. 收斂程度
+    2. margin大小
+- 正樣本上升程度
+    - q25~bell_q25_random_sigma_0.05~bell_q25_random_sigma_0.15>bell_q25_random_sigma_0.25>>random
+    - 越集中正樣本上升越多
+- 負樣本下降程度
+    - q25>>random > qbell_q25_random_sigma_0.25~bell_q25_random_sigma_0.15~bell_q25_random_sigma_0.05
+    - 越集中負樣本下降越多
+- margins
+    - q25  > bell_q25_random_sigma_0.05> bell_q25_random_sigma_0.15>bell_q25_random_sigma_0.25>random
+    - 越集中margin拉開越大
+
+#### 綜合分析
+- 可能在更傾向提升正樣本的前提下，margin拉開到1.0左右最好?
+
+
 # Sequence logprob margin on sdpo_neg3
 - epoch 1
 - training sequence 200
+
 ![lastfm_321B_200seq_1epoch_p_compare_accuracies](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/chosen_p.png)
 ![lastfm_321B_200seq_1epoch_p_compare_accuracies](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/rejected1_p.png)
 ![distribution](./toy_200seq/train_sequence_logprob_margin_distribution.png)
@@ -92,18 +249,16 @@ Limitations of DPO: A Theoretical Perspective](https://arxiv.org/abs/2404.04626)
         - 0.2380761523046092 0.8416833667334669
 
 ## 集中度
+### middle
 ![lastfm_321B_200seq_1epoch_p_compare_accuracies](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/rewards_chosen_middle.png)
 ![lastfm_321B_200seq_1epoch_p_compare_accuracies](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/rewards_rejected1_middle.png)
 - sequence_logprob_margin
     - middle
         - 0.2881763527054108 0.972745490981964
-
     - bell_random_sigma0.15
         - 0.29298597194388776 0.9711422845691383
-
-    - bell_random
+    - bell_random_sigma_0.25
         - 0.29178356713426856 0.9751503006012024
-        
 - random
     - 0.29178356713426856 0.9743486973947896
 
@@ -112,6 +267,29 @@ Limitations of DPO: A Theoretical Perspective](https://arxiv.org/abs/2404.04626)
 - 負樣本下降程度
     - 差不多
 
+### q25
+![chosen](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/reward_chosen_q25.png)
+![rejected1](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/reward_rejected1_q25.png)
+![margins-rejected1](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/reward_margins-rejected1_q25.png)
+![accuracies](./output/sdpo_neg3/summary_results/sequence_logprob_margin_lastfm_321B_200seq_1epoch_p_compare/loss_q25.png)
+
+
+- sequence_logprob_margin
+    - q25
+        - 0.2905811623246493 0.9691382765531062
+    - bell_q25_random_sigma_0.15
+        - 0.29298597194388776 0.9595190380761524
+    - bell_q25_random_sigma_0.25
+        - 0.29378757515030063 0.9615230460921844
+- random
+    - 0.29178356713426856 0.9743486973947896
+
+- 正樣本上升程度
+    - q25~bell_q25_random_sigma_0.15>bell_q25_random_sigma_0.25>>random
+- 負樣本下降程度
+    - q25>>random > qbell_q25_random_sigma_0.25~bell_q25_random_sigma_0.15
+- margins
+    - q25 > bell_q25_random_sigma_0.15>bell_q25_random_sigma_0.25>random
 
 - 根據[Towards Analyzing and Understanding the
 Limitations of DPO: A Theoretical Perspective](https://arxiv.org/abs/2404.04626)，模型傾向更強力壓縮負樣本
@@ -135,41 +313,6 @@ Limitations of DPO: A Theoretical Perspective](https://arxiv.org/abs/2404.04626)
 - 2 step 
     - low margin -> high margin
     - low margin -> popularity base
-
-- tamux sdpo_run
-    - bash softmax_dpo_200seq.sh 0   
-    - -------------- DPO Training Mode-----------                                               
-        Reject select mode: random                                                                               
-        logging_dir: ./logs/sdpo_neg3/random_lastfm_321B_200seq_1epoch/                                          
-        output_dir: ./output/sdpo_neg3/random_lastfm_321B_200seq_1epoch/   
-- tamux sdpo_run2
-    - bash softmax_dpo_200seq_sort_all_percentage.sh 1 sequence
-_logprob_margin                                            
-    - ----------------- DPO Training Mode -----------------
-        Reject select mode: lowest                                                                               
-        Reject sort metric: sequence_logprob_margin                                                              
-        logging_dir: ./logs/sdpo_neg3/sequence_logprob_margin_lowest_lastfm_321B_200seq_1epoch/
-        output_dir: ./output/sdpo_neg3/sequence_logprob_margin_lowest_lastfm_321B_200seq_1epoch/
-        -----------------------------------------------------                             
-- tmux sdpo_run3
-    - bash softmax_dpo_200seq_sort_all_percentage.sh 3 ln_ches_
-score 3
-    - ----------------- DPO Training Mode ----------------- 
-        Reject select mode: lowest                                                                               
-        Reject sort metric: ln_ches_score                                                                        
-        logging_dir: ./logs/sdpo_neg3/ln_ches_score_lowest_lastfm_321B_200seq_3epoch/
-        output_dir: ./output/sdpo_neg3/ln_ches_score_lowest_lastfm_321B_200seq_3epoch/
-        -----------------------------------------------------
-- tmux sdpo_run4
-    - bash softmax_dpo_200seq_sort_all_percentage.sh 2 ches_sco
-re
-    - ----------------- DPO Training Mode ----------------- 
-        Reject select mode: lowest                                                                               
-        Reject sort metric: ches_score                                                                           
-        logging_dir: ./logs/sdpo_neg3/ches_score_lowest_lastfm_321B_200seq_1epoch/                               
-        output_dir: ./output/sdpo_neg3/ches_score_lowest_lastfm_321B_200seq_1epoch/
-        -----------------------------------------------------
-
 
 
 - [觀察]
@@ -333,6 +476,11 @@ random
         - accuracies 0.6
         - reject1 ~ 0
         - margins-reject1 1
+    - bell_q25_random_sigma_0.15
+        - 0.29298597194388776 0.9595190380761524
+    - bell_q25_random_sigma_0.05
+        - 0.28937875751503006 0.9735470941883767
+
 
     - [4] bell_q75_random
         - 0.2905811623246493 0.9791583166332666

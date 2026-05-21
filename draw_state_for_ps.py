@@ -13,14 +13,14 @@ elif epoch == 3:
     checkpoint_step = 204   # 這是 inference 的 checkpoint，通常是最後一個 checkpoint
 # 要畫的 p
 # p_list = ["random", "bell_random", "bell_random_sigma0.15", 50]#, "bell_q25_random_sigma0.25", "bell_q75_random_sigma0.25"]   # 這裡的 p 是指 reject 的百分比，random 是隨機 reject
-p_list = [50, "bell_random_sigma0.15", "bell_random", "random"]#, "bell_q25_random_sigma0.25", "bell_q75_random_sigma0.25"]   # 這裡的 p 是指 reject 的百分比，random 是隨機 reject
-
+p_list = [25,"bell_random_p0.25_sigma0.05" ,"bell_random_p0.25_sigma0.15", "bell_q25_random_sigma0.25", "random"]#, "bell_q25_random_sigma0.25", "bell_q75_random_sigma0.25"]   # 這裡的 p 是指 reject 的百分比，random 是隨機 reject
+# p_list = [0, 25, 50, 75, 100]
 base = "output/sdpo_neg3"   # 根目錄，裡面有不同 p 的資料夾
 
 # metric 設定
-metric_ = "rejected-rejected1"   # chosen / rejected / margins
+metric_ = "margins-rejected1"   # chosen / rejected / margins
 # metric = metric_
-metric = f"logits/{metric_}"   # e.g. logps/chosen
+metric = f"rewards/{metric_}"   # e.g. logps/chosen
 
 plt.figure(figsize=(10, 6))
 
@@ -32,8 +32,11 @@ for p in p_list:
             filename = f"{checkpoint_dir}/trainer_state.json"
             if not os.path.exists(filename):
                 print(f"❌ Missing: random")
+            p_str = "random"
         else:
-            if p == 0:
+            if isinstance(p, str):
+                p_str = p
+            elif p == 0:
                 p_str = "lowest"
             elif p == 100:
                 p_str = "highest"
@@ -112,7 +115,7 @@ for p in p_list:
             df_eval["step"],
             df_eval["value"],
             marker='o',
-            label=f"p{p}"
+            label=p_str
         )
 
     except Exception as e:
@@ -129,7 +132,7 @@ plt.grid(True)
 save_dir = f"./{base}/summary_results/{method}_{category}_321B_200seq_{epoch}epoch_p_compare/"
 os.makedirs(save_dir, exist_ok=True)
 
-save_path = f"./{base}/summary_results/{method}_{category}_321B_200seq_{epoch}epoch_p_compare/logits_{metric_}_middle.png"
+save_path = f"./{base}/summary_results/{method}_{category}_321B_200seq_{epoch}epoch_p_compare/reward_{metric_}_q25.png"
 plt.savefig(save_path)
 plt.show()
 
