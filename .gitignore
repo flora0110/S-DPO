@@ -15,8 +15,11 @@ sample_data/
 **/sampled_data/
 toy_100seq/
 **/toy_100seq/
-toy_200seq/
-**/toy_200seq/
+toy_200seq/*.json
+**/toy_200seq/*.json
+toy_200seq/*.jsonl
+**/toy_200seq/*.jsonl
+
 **/tokenizer.json
 **/dog.log
 logs/*
